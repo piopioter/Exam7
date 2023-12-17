@@ -40,19 +40,17 @@ public class ImportService implements IImportService {
         this.employeeService = employeeService;
         this.retireeService = retireeService;
         this.studentService = studentService;
-        //this.importStatus = new ImportStatus();
+
     }
 
     @Override
     public void uploadFromCsvFile(MultipartFile file) {
         if (atomicBoolean.compareAndSet(false, true)) {
-
             importStatus.setCreationDate(LocalDateTime.now());
             importStatus.setStatus(StatusType.IN_PROGRESS);
 
-             CompletableFuture.runAsync(() -> processFile(file))
-                    .whenComplete((x,y) -> atomicBoolean.set(false));
-
+            CompletableFuture.runAsync(() -> processFile(file))
+                    .whenComplete((x, y) -> atomicBoolean.set(false));
         } else
             throw new ImportAlreadyInProgressException("Another import in progress");
     }
@@ -88,7 +86,7 @@ public class ImportService implements IImportService {
                 importStatus.setProcessedRows(cnt);
             }
             importStatus.setStatus(StatusType.COMPLETED);
-        } catch (IOException e ) {
+        } catch (IOException e) {
             importStatus.setStatus(StatusType.FAILED);
             throw new ImportProcessingException("Error processing import ", e);
         }

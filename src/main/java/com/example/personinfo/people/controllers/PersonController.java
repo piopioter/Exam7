@@ -37,7 +37,7 @@ public class PersonController {
 
     @GetMapping
     public ResponseEntity<Page<PersonDto>> getPeopleByCriteria(@ModelAttribute SearchCriteria searchCriteria,
-                                                               @PageableDefault(size = 100) Pageable pageable) {
+                                                               @PageableDefault(size = 20) Pageable pageable) {
         Page<Person> personPage = personService.getByCriteria(searchCriteria, pageable);
         Page<PersonDto> map = personPage.map(this::mapToPerson);
         return ResponseEntity.ok(map);

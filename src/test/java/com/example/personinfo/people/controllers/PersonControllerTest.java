@@ -55,7 +55,7 @@ class PersonControllerTest {
 
     @Test
     @WithMockUser
-    public void shouldGetAllPersonByCriteria() throws Exception {
+    public void shouldGetAllPersonByName() throws Exception {
         //given
         Person e1 = new Employee("Jan", "Kowalski", "97012303195", 170.0, 80.5,
                 "jan@wp.pl", LocalDate.parse("2022-02-02"), "Mechanic", BigDecimal.valueOf(5000));
@@ -66,15 +66,46 @@ class PersonControllerTest {
                 LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(5000));
         personRepository.saveAllAndFlush(List.of(e1, r1, s1));
         //when
-        mockMvc.perform(get("/api/v1/people")
+        mockMvc.perform(get("/api/v1/people?sort=id")
                 .param("firstName", "Jan")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.content[0].firstName").value("Jan"))
-                .andExpect(jsonPath("$.content[0].pesel").value("97012303195"))
-                .andExpect(jsonPath("$.content[1].firstName").value("Jan"))
-                .andExpect(jsonPath("$.content[1].pesel").value("97012403194"));
+                .andExpect(jsonPath("$.content.[0].firstName").value("Jan"))
+                .andExpect(jsonPath("$.content.[0].pesel").value("97012303195"))
+                .andExpect(jsonPath("$.content.[0].currentPosition").value("Mechanic"))
+                .andExpect(jsonPath("$.content.[1].firstName").value("Jan"))
+                .andExpect(jsonPath("$.content.[1].pesel").value("97012403194"))
+                .andExpect(jsonPath("$.content.[1].yearsWorked").value(30));
+        //then
+        verify(personRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
+    }
+
+    @Test
+    @WithMockUser
+    public void shouldGetAllPersonByType() throws Exception {
+        //given
+        Person e1 = new Employee("Jan", "Kowalski", "97012303195", 170.0, 80.5,
+                "jan@wp.pl", LocalDate.parse("2022-02-02"), "Mechanic", BigDecimal.valueOf(5000));
+        Person r1 = new Retiree("Jan", "Gil", "97012403194",
+                180.0, 100.0, "jan@wp.pl", BigDecimal.valueOf(2400), 30);
+        Person e2 = new Employee("Kuba", "Nowak", "97041603395", 190.0, 89.5,
+                "jan@wp.pl", LocalDate.parse("2022-02-02"), "Plumber", BigDecimal.valueOf(7000));
+
+        personRepository.saveAllAndFlush(List.of(e1, r1, e2));
+        //when
+        mockMvc.perform(get("/api/v1/people?sort=id")
+                .param("type", "Employee")
+                .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content.[0].firstName").value("Jan"))
+                .andExpect(jsonPath("$.content.[0].pesel").value("97012303195"))
+                .andExpect(jsonPath("$.content.[0].currentPosition").value("Mechanic"))
+                .andExpect(jsonPath("$.content.[1].firstName").value("Kuba"))
+                .andExpect(jsonPath("$.content.[1].pesel").value("97041603395"))
+                .andExpect(jsonPath("$.content.[1].currentPosition").value("Plumber"));
+
         //then
         verify(personRepository, times(1)).findAll(any(Specification.class), any(Pageable.class));
     }
