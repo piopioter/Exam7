@@ -8,7 +8,6 @@ import java.math.BigDecimal;
 import java.util.Objects;
 
 @Entity
-@Table(name = "retirees")
 @DiscriminatorValue("Retiree")
 public class Retiree extends Person implements Serializable {
 
