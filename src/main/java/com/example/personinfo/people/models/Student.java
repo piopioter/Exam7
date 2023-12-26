@@ -2,6 +2,7 @@ package com.example.personinfo.people.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -9,7 +10,7 @@ import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
-@Table(name = "students")
+@DiscriminatorValue("Student")
 public class Student extends Person implements Serializable {
 
     private static final long serialVersionUID = 1L;

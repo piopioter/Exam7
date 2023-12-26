@@ -5,4 +5,6 @@ import jakarta.transaction.Transactional;
 
 @Transactional
 public interface PersonRepository extends PersonGenericRepository<Person>{
+
+
 }

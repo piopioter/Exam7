@@ -131,10 +131,12 @@ class PositionControllerTest {
     @WithMockUser(roles = {"ADMIN"})
     public void shouldAssignPositionWithRoleAdmin() throws Exception {
         //given
+        Position p1 = new Position(
+                "Mechanic", LocalDate.parse("2022-01-01"), LocalDate.parse("2024-01-01"), BigDecimal.valueOf(8000));
+        positionRepository.saveAndFlush(p1);
         Employee e1 = new Employee("Jan", "Kowalski", "97012303195", 170.0, 80.5,
                 "jan@wp.pl", LocalDate.parse("2022-02-02"), "Mechanic", BigDecimal.valueOf(5000));
         employeeRepository.saveAndFlush(e1);
-        when(positionRepository.existsById(1L)).thenReturn(true);
         PositionAssignCommand command = new PositionAssignCommand(1L, "Programmer", LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 1L);
         //when
@@ -202,9 +204,11 @@ class PositionControllerTest {
     @WithMockUser
     public void shouldUpdatePosition() throws Exception {
         //given
+        Position p1 = new Position(
+                "Programmer", LocalDate.parse("2022-01-01"), LocalDate.parse("2024-01-01"), BigDecimal.valueOf(8000));
+        positionRepository.saveAndFlush(p1);
         UpdatePositionCommand command = new UpdatePositionCommand(1L, "Programmer",
                 LocalDate.parse("2025-01-01"), LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000));
-        when(positionRepository.existsById(1L)).thenReturn(true);
 
         //when
         mockMvc.perform(put("/api/v1/positions")
@@ -240,8 +244,11 @@ class PositionControllerTest {
     @Test
     @WithMockUser
     public void shouldDeletePosition() throws Exception {
+        //given
+        Position p1 = new Position(
+                "Programmer", LocalDate.parse("2022-01-01"), LocalDate.parse("2024-01-01"), BigDecimal.valueOf(8000));
+        positionRepository.saveAndFlush(p1);
         //when
-        when(positionRepository.existsById(1L)).thenReturn(true);
         mockMvc.perform(delete("/api/v1/positions/{id}", 1L))
                 .andExpect(status().isOk())
                 .andDo(print())

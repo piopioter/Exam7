@@ -3,6 +3,7 @@ package com.example.personinfo.people.models;
 import com.example.personinfo.position.models.Position;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,7 +13,7 @@ import java.util.Objects;
 import java.util.Set;
 
 @Entity
-@Table(name = "employees")
+@DiscriminatorValue("Employee")
 public class Employee extends Person implements Serializable {
 
     private static final long serialVersionUID = 42L;

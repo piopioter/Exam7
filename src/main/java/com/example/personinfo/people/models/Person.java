@@ -1,18 +1,22 @@
 package com.example.personinfo.people.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.util.Objects;
 
 @Entity
-@Inheritance(strategy = InheritanceType.JOINED)
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "type")
 public abstract class Person implements Serializable {
 
     private static final long serialVersionUID = 1L;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Column(name = "type", insertable = false, updatable = false)
+    private String type;
     private String firstName;
     private String lastName;
     @Column(unique = true)
@@ -98,6 +102,7 @@ public abstract class Person implements Serializable {
     public void setVersion(Long version) {
         this.version = version;
     }
+
 
     @Override
     public boolean equals(Object o) {

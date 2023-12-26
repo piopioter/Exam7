@@ -1,6 +1,7 @@
 package com.example.personinfo.people.commands;
 
 import com.example.personinfo.people.annotations.PersonType;
+import com.example.personinfo.people.commands.CreatePersonCommand;
 import com.example.personinfo.people.models.Student;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +13,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 @PersonType(Student.class)
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class CreateStudentCommand extends CreatePersonCommand{
+public class CreateStudentCommand extends CreatePersonCommand {
     @NotBlank
     private String universityName;
     @NotNull

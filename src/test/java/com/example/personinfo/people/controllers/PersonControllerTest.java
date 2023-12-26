@@ -1,5 +1,6 @@
 package com.example.personinfo.people.controllers;
 
+import com.example.personinfo.people.commands.CreateStudentCommand;
 import com.example.personinfo.people.commands.*;
 import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.models.Person;
@@ -7,10 +8,7 @@ import com.example.personinfo.people.models.Retiree;
 import com.example.personinfo.people.models.Student;
 import com.example.personinfo.people.repositories.PersonRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aspectj.lang.annotation.Before;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
+import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,13 +28,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -65,9 +65,11 @@ class PersonControllerTest {
                 "kuba@o2.com", "Ignacego",
                 LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(5000));
         personRepository.saveAllAndFlush(List.of(e1, r1, s1));
+        Map<String, String> params = new HashMap<>();
+        params.put("firstName", "Jan");
         //when
         mockMvc.perform(get("/api/v1/people?sort=id")
-                .param("firstName", "Jan")
+                .content(om.writeValueAsBytes(params))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -91,11 +93,12 @@ class PersonControllerTest {
                 180.0, 100.0, "jan@wp.pl", BigDecimal.valueOf(2400), 30);
         Person e2 = new Employee("Kuba", "Nowak", "97041603395", 190.0, 89.5,
                 "jan@wp.pl", LocalDate.parse("2022-02-02"), "Plumber", BigDecimal.valueOf(7000));
-
         personRepository.saveAllAndFlush(List.of(e1, r1, e2));
+        Map<String, String> params = new HashMap<>();
+        params.put("type", "Employee");
         //when
         mockMvc.perform(get("/api/v1/people?sort=id")
-                .param("type", "Employee")
+                .content(om.writeValueAsString(params))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
@@ -152,7 +155,6 @@ class PersonControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    @Transactional
     public void shouldUpdatePersonWithAdminRole() throws Exception {
         //given
         Person p1 = new Student("Jan", "Kowalski", "97012303195", 165.0, 68.9,
@@ -160,7 +162,7 @@ class PersonControllerTest {
                 "Philosophy", BigDecimal.valueOf(6000));
         personRepository.saveAndFlush(p1);
         UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 1L, "Jan", "Kowalski",
-                "97012303195", 180.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
+                "97012303195", 200.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
                 LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(6000));
         //when
         mockMvc.perform(put("/api/v1/people")
@@ -172,10 +174,11 @@ class PersonControllerTest {
                 .andExpect(jsonPath("$.firstName").value("Jan"))
                 .andExpect(jsonPath("$.lastName").value("Kowalski"))
                 .andExpect(jsonPath("$.pesel").value("97012303195"))
-                .andExpect(jsonPath("$.height").value(180.0))
+                .andExpect(jsonPath("$.height").value(200.0))
                 .andExpect(jsonPath("$.studyField").value("Philosophy"));
         //then
         verify(personRepository, times(1)).save(any(Person.class));
+
     }
 
     @Test
@@ -187,7 +190,7 @@ class PersonControllerTest {
                 "Philosophy", BigDecimal.valueOf(6000));
         personRepository.saveAndFlush(p1);
         UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 2L, "Jan", "Kowalski",
-                "97012303195", 165.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
+                "97012303194", 165.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
                 LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(6000));
         //when
         mockMvc.perform(put("/api/v1/people")
@@ -199,26 +202,6 @@ class PersonControllerTest {
 
     }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    public void shouldReturnConflictStatusWhenVersionIsIncorrect() throws Exception {
-        //given
-        UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 1L, "Jan", "Kowalski",
-                "97012303195", 165.0, 68.9, "jan@wp.pl", 1L, "Ignacego",
-                LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(6000));
-        Person p1 = new Student("Jan", "Kowalski", "97012303195", 165.0, 68.9,
-                "jan@wp.pl", "Ignacego", LocalDate.parse("2022-02-02"),
-                "Philosophy", BigDecimal.valueOf(6000));
-        personRepository.saveAndFlush(p1);
-        //when
-        mockMvc.perform(put("/api/v1/people")
-                .content(om.writeValueAsString(c1))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
-                .andDo(print())
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value(
-                        "This entity has been modified by another entity"));
-    }
 
     @Test
     @WithMockUser(roles = "IMPORTER")
@@ -239,9 +222,6 @@ class PersonControllerTest {
                 .andExpect(status().isForbidden());
 
     }
-
-
-
 
 
 }

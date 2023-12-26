@@ -34,10 +34,11 @@ public class PositionService implements IPositionService {
 
 
     @Override
+    @Transactional
     public Position assignEmployee(Position position) {
         Employee employee = employeeService.get(position.getEmployee().getId());
-        if (!positionRepository.existsById(position.getId()))
-            throw new ResourceNotFoundException("Not found entity to assign with id: " + position.getId());
+        positionRepository.findById(position.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Not found entity to assign with id: " + position.getId()));
         employee.setCurrentPosition(position.getName());
         employee.setCurrentSalary(position.getSalary());
         employee.setEmploymentDate(position.getStartDate());
@@ -51,17 +52,19 @@ public class PositionService implements IPositionService {
 
 
     @Override
+    @Transactional
     public Position update(Position position) {
-        if (!positionRepository.existsById(position.getId()))
-            throw new ResourceNotFoundException("Not found entity to update with id: " + position.getId());
+        positionRepository.findById(position.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Not found entity to update with id: " + position.getId()));
         return positionRepository.save(position);
 
     }
 
     @Override
+    @Transactional
     public void delete(Long positionId) {
-        if (!positionRepository.existsById(positionId))
-            throw new ResourceNotFoundException("Not found entity to delete with id: " + positionId);
+        positionRepository.findById(positionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found entity to delete with id: " + positionId));
 
         positionRepository.deleteById(positionId);
 

@@ -1,6 +1,7 @@
 package com.example.personinfo.people.models;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -8,6 +9,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "retirees")
+@DiscriminatorValue("Retiree")
 public class Retiree extends Person implements Serializable {
 
     private static final long serialVersionUID = 1L;

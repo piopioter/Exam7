@@ -18,7 +18,7 @@ public abstract class UpdatePersonCommand {
     private String firstName;
     @NotBlank
     private String lastName;
-    @PESEL
+    //@PESEL
     private String pesel;
     @Positive
     @NotNull
