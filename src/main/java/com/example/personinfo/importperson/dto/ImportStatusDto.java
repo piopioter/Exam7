@@ -1,18 +1,20 @@
 package com.example.personinfo.importperson.dto;
 
+import com.example.personinfo.importperson.models.StatusType;
+
 import java.time.LocalDateTime;
 
 public class ImportStatusDto {
-    private String status;
+    private StatusType status;
     private LocalDateTime creationDate;
     private LocalDateTime startDate;
-    private int processedRows;
+    private Long processedRows;
 
-    public String getStatus() {
+    public StatusType getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(StatusType status) {
         this.status = status;
     }
 
@@ -32,11 +34,11 @@ public class ImportStatusDto {
         this.startDate = startDate;
     }
 
-    public int getProcessedRows() {
+    public Long getProcessedRows() {
         return processedRows;
     }
 
-    public void setProcessedRows(int processedRows) {
+    public void setProcessedRows(Long processedRows) {
         this.processedRows = processedRows;
     }
 }

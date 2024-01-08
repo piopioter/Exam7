@@ -1,14 +1,41 @@
 package com.example.personinfo.importperson.models;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import jakarta.persistence.*;
 
-public class ImportStatus {
+import java.io.Serializable;
+import java.time.LocalDateTime;
+import java.util.Objects;
+
+@Entity
+@Table(name = "imports")
+public class ImportStatus implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    @Enumerated(value = EnumType.STRING)
     private StatusType status;
     private LocalDateTime creationDate;
     private LocalDateTime startDate;
-    private int processedRows;
+    private Long processedRows;
 
+    public ImportStatus() {
+    }
+
+    public ImportStatus(StatusType status, LocalDateTime creationDate, LocalDateTime startDate, Long processedRows) {
+        this.status = status;
+        this.creationDate = creationDate;
+        this.startDate = startDate;
+        this.processedRows = processedRows;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public StatusType getStatus() {
         return status;
@@ -34,11 +61,25 @@ public class ImportStatus {
         this.startDate = startDate;
     }
 
-    public int getProcessedRows() {
+    public Long getProcessedRows() {
         return processedRows;
     }
 
-    public void setProcessedRows(int processedRows) {
+    public void setProcessedRows(Long processedRows) {
         this.processedRows = processedRows;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ImportStatus that = (ImportStatus) o;
+        return Objects.equals(id, that.id) && status == that.status && Objects.equals(creationDate, that.creationDate) && Objects.equals(startDate, that.startDate) && Objects.equals(processedRows, that.processedRows);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, status, creationDate, startDate, processedRows);
     }
 }

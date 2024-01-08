@@ -7,10 +7,12 @@ import com.example.personinfo.people.models.Person;
 import com.example.personinfo.people.models.Retiree;
 import com.example.personinfo.people.models.Student;
 import com.example.personinfo.people.repositories.PersonRepository;
+import com.example.personinfo.people.services.PersonService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -33,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -51,6 +56,42 @@ class PersonControllerTest {
     private PersonRepository personRepository;
     @Autowired
     private ObjectMapper om;
+    @SpyBean
+    private PersonService personService;
+    @Autowired
+    private ModelMapper modelMapper;
+
+
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void shouldUpdatePersonWithOptimisticLocking() throws Exception {
+        //given
+        Person s1 = new Student("Jan", "Kowalski", "97012303195", 165.0, 68.9,
+                "jan@wp.pl", "Ignacego", LocalDate.parse("2022-02-02"),
+                "Philosophy", BigDecimal.valueOf(6000));
+        UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 1L, "Jan", "Kowalski",
+                "97012303195", 200.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
+                LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(7000));
+        personService.save(s1);
+        assertEquals(0, s1.getVersion());
+        CountDownLatch latch = new CountDownLatch(2);
+        PersonThread p1 = new PersonThread(c1, latch);
+        PersonThread p2 = new PersonThread(c1, latch);
+        //when
+        p1.start();
+        p2.start();
+        latch.await();
+        Person person = personRepository.findById(s1.getId()).orElseThrow();
+
+        //then
+        assertAll(
+                () -> assertTrue(p1.hasObjectOptimisticLockingFailure() || p2.hasObjectOptimisticLockingFailure()),
+                () -> assertEquals(1, person.getVersion()),
+                () -> assertEquals(200.0, person.getHeight()),
+                () -> verify(personService, times(2)).update(any(Person.class))
+        );
+
+    }
 
 
     @Test
@@ -224,4 +265,30 @@ class PersonControllerTest {
     }
 
 
+    class PersonThread extends Thread {
+        private UpdatePersonCommand command;
+        private CountDownLatch countDownLatch;
+        private Class<?> exception;
+
+
+        public PersonThread(UpdatePersonCommand command, CountDownLatch countDownLatch) {
+            this.command = command;
+            this.countDownLatch = countDownLatch;
+        }
+
+        boolean hasObjectOptimisticLockingFailure() {
+            return this.exception == ObjectOptimisticLockingFailureException.class;
+        }
+
+        @Override
+        public void run() {
+            try {
+                personService.update(modelMapper.map(command, Student.class));
+            } catch (Exception e) {
+                exception = e.getClass();
+            } finally {
+                countDownLatch.countDown();
+            }
+        }
+    }
 }

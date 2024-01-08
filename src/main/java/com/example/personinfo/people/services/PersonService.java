@@ -31,7 +31,6 @@ public class PersonService implements IPersonService<Person> {
         return personRepository.findAll(filter, pageable);
     }
 
-
     @Override
     public Person save(Person person) {
         return personRepository.save(person);

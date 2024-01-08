@@ -3,20 +3,37 @@ package com.example.personinfo.importperson.controllers;
 import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.models.Student;
 import com.example.personinfo.people.repositories.EmployeeRepository;
+import com.example.personinfo.people.repositories.PersonRepository;
 import com.example.personinfo.people.repositories.RetireeRepository;
 import com.example.personinfo.people.repositories.StudentRepository;
+import jakarta.validation.constraints.AssertTrue;
 import org.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+
+import org.mockito.Spy;
+import org.springframework.batch.core.JobExecution;
+import org.springframework.batch.core.JobParameters;
+import org.springframework.batch.core.JobParametersBuilder;
+import org.springframework.batch.core.launch.JobLauncher;
+import org.springframework.batch.core.repository.JobRepository;
+import org.springframework.batch.test.JobLauncherTestUtils;
+import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
+import org.springframework.test.context.support.DirtiesContextTestExecutionListener;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.ResultActions;
@@ -25,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -47,12 +65,11 @@ class ImportControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
     @SpyBean
-    private EmployeeRepository employeeRepository;
-    @SpyBean
-    private RetireeRepository retireeRepository;
-    @SpyBean
-    private StudentRepository studentRepository;
+    private PersonRepository personRepository;
+
+
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -68,10 +85,10 @@ class ImportControllerTest {
                 .file(file))
                 .andDo(print())
                 .andExpect(status().isAccepted());
-
         //then
-        verify(employeeRepository, timeout(100).times(1)).save(any(Employee.class));
-        verify(studentRepository, timeout(100).times(1)).save(any(Student.class));
+        verify(personRepository,timeout(1)).saveAll(any());
+
+
     }
 
     @Test
@@ -91,16 +108,13 @@ class ImportControllerTest {
                 .andExpect(status().isAccepted());
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() ->
-                mockMvc.perform(get("/api/v1/import/status").with(user("user").roles("ADMIN")))
+                mockMvc.perform(get("/api/v1/import/status/1").with(user("user").roles("ADMIN")))
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("COMPLETED"))
                         .andExpect(jsonPath("$.processedRows").value(2))
         );
 
-        //then
-        verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(studentRepository, times(1)).save(any(Student.class));
     }
 
     @Test
@@ -125,11 +139,7 @@ class ImportControllerTest {
                 .andDo(print())
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message").value("Another import in progress"));
-
-
         //then
-        verify(employeeRepository, times(1)).save(any(Employee.class));
-        verify(studentRepository, times(1)).save(any(Student.class));
     }
 
     @Test
