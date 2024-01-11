@@ -6,6 +6,7 @@ import com.example.personinfo.importperson.models.ImportStatus;
 import com.example.personinfo.importperson.services.ImportService;
 import com.example.personinfo.importperson.validations.ValidFile;
 import org.modelmapper.ModelMapper;
+import org.springframework.context.annotation.Scope;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -30,7 +31,7 @@ public class ImportController {
     public ResponseEntity<StatusDto> upload(@RequestParam  @ValidFile MultipartFile file) {
         String id = importService.uploadFromCsvFile(file);
         return ResponseEntity.status(HttpStatus.ACCEPTED)
-                .body(new StatusDto("Accepted file: " + file.getOriginalFilename() , "Import id: " + id));
+                .body(new StatusDto("Accepted file: " + file.getOriginalFilename(), "Import id: " + id));
     }
     @GetMapping("/status/{id}")
     public ResponseEntity<ImportStatusDto> getStatus(@PathVariable("id") Long id){
