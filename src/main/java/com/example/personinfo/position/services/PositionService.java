@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-@Transactional
 public class PositionService implements IPositionService {
 
     private PositionRepository positionRepository;
@@ -28,7 +27,7 @@ public class PositionService implements IPositionService {
 
     @Override
     public List<Position> getAllByEmployeeId(Long employeeId) {
-        return positionRepository.findAllByEmployee_Id(employeeId);
+        return positionRepository.findAllByEmployeeId(employeeId);
 
     }
 

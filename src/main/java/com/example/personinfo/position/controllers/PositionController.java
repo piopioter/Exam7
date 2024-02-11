@@ -71,6 +71,6 @@ public class PositionController {
     @DeleteMapping("/{id}")
     public ResponseEntity<StatusDto> delete(@PathVariable("id") Long id) {
         positionService.delete(id);
-        return ResponseEntity.ok(new StatusDto("Deleted position with id: " + id));
+        return ResponseEntity.ok(new StatusDto(String.valueOf(id)));
     }
 }

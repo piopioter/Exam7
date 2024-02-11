@@ -27,6 +27,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(exceptionResponseDto);
     }
+
     @ExceptionHandler(DataConflictException.class)
     public ResponseEntity<ExceptionResponseDto> handleDataConflictException(DataConflictException e){
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(
@@ -42,6 +43,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(exceptionResponseDto);
     }
+
     @ExceptionHandler(ImportAlreadyInProgressException.class)
     public ResponseEntity<ExceptionResponseDto> handleImportAlreadyInProgressException(ImportAlreadyInProgressException e){
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(
@@ -49,6 +51,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponseDto);
     }
+
     @ExceptionHandler({ConstraintViolationException.class})
     public ResponseEntity<ExceptionResponseDto> handleConstraintViolationException(ConstraintViolationException e) {
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(

@@ -1,22 +1,21 @@
 package com.example.personinfo.importperson.dto;
 
-import java.time.LocalDateTime;
-
 public class StatusDto {
 
-    private String message;
     private String id;
+    private String fileName;
 
-    public StatusDto(String message, String id) {
-        this.message = message;
+    public StatusDto(String id, String fileName) {
         this.id = id;
-    }
-
-    public String getMessage() {
-        return message;
+        this.fileName = fileName;
     }
 
     public String getId() {
         return id;
     }
+
+    public String getFileName() {
+        return fileName;
+    }
+
 }

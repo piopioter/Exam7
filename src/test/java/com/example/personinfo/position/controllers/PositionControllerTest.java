@@ -77,7 +77,7 @@ class PositionControllerTest {
                 .andExpect(jsonPath("$[1].salary").value(24000));
 
         //then
-        verify(positionRepository, times(1)).findAllByEmployee_Id(1L);
+        verify(positionRepository, times(1)).findAllByEmployeeId(1L);
     }
 
 
@@ -252,7 +252,7 @@ class PositionControllerTest {
         mockMvc.perform(delete("/api/v1/positions/{id}", 1L))
                 .andExpect(status().isOk())
                 .andDo(print())
-                .andExpect(jsonPath("$.status").value("Deleted position with id: 1"));
+                .andExpect(jsonPath("$.status").value("1"));
         //then
         verify(positionRepository, times(1)).deleteById(1L);
     }

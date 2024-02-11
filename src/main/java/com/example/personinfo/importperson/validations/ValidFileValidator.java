@@ -13,12 +13,11 @@ public class ValidFileValidator implements ConstraintValidator<ValidFile, Multip
 
     @Override
     public boolean isValid(MultipartFile value, ConstraintValidatorContext context) {
-
         String contentType = value.getContentType();
-        if (!contentType.equals("text/csv"))
-            return false;
+        if (contentType == null)
+            return true;
 
-        return true;
+        return contentType.equals("text/csv");
     }
 
 

@@ -69,8 +69,6 @@ class ImportControllerTest {
     @SpyBean
     private PersonRepository personRepository;
 
-
-
     @Test
     @WithMockUser(roles = "ADMIN")
     public void shouldUploadFile() throws Exception {
@@ -84,9 +82,13 @@ class ImportControllerTest {
         mockMvc.perform(multipart("/api/v1/import")
                 .file(file))
                 .andDo(print())
-                .andExpect(status().isAccepted());
+                .andExpect(status().isAccepted())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.fileName").value("test.csv"));
+
         //then
-        verify(personRepository,timeout(1)).saveAll(any());
+        verify(personRepository,times(1)).saveAllAndFlush(any());
+
 
 
     }
@@ -108,7 +110,7 @@ class ImportControllerTest {
                 .andExpect(status().isAccepted());
 
         await().atMost(30, TimeUnit.SECONDS).untilAsserted(() ->
-                mockMvc.perform(get("/api/v1/import/status/1").with(user("user").roles("ADMIN")))
+                mockMvc.perform(get("/api/v1/import/1/status").with(user("user").roles("ADMIN")))
                         .andDo(print())
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$.status").value("COMPLETED"))

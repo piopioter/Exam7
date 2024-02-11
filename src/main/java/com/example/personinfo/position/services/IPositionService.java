@@ -14,7 +14,7 @@ public interface IPositionService {
 
     Position create(Position position);
 
-    Position update( Position position);
+    Position update(Position position);
 
     void delete(Long positionId);
 

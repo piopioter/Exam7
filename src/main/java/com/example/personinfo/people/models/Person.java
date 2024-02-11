@@ -19,7 +19,7 @@ public abstract class Person implements Serializable {
     private String type;
     private String firstName;
     private String lastName;
-    @Column(unique = true)
+    //@Column(unique = true)
     private String pesel;
     private Double height;
     private Double weight;
