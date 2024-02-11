@@ -31,21 +31,19 @@ public class FileProcessingService {
 
     private BatchProcessingService batchProcessingService;
     private ProcessPersonFactory personFactory;
-    private PersonRepository personRepository;
+    private ImportRepository importRepository;
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
     private int batchSize;
-    @PersistenceContext
-    private EntityManager entityManager;
 
     public FileProcessingService(BatchProcessingService batchProcessingService, ProcessPersonFactory personFactory,
-                                 PersonRepository personRepository) {
+                                ImportRepository importRepository) {
         this.batchProcessingService = batchProcessingService;
         this.personFactory = personFactory;
-        this.personRepository = personRepository;
+        this.importRepository = importRepository;
+
     }
 
     @Async
-    @Transactional
     public void processFile(MultipartFile file, ImportStatus importStatus) {
         long cnt = 0;
         String line;
@@ -61,26 +59,29 @@ public class FileProcessingService {
                 persons.add(person);
                 if (persons.size() == batchSize) {
                     cnt += persons.size();
-                    personRepository.saveAllAndFlush(persons);
-                    batchProcessingService.updateImport(importStatus, cnt);
-                    entityManager.clear();
+                    batchProcessingService.saveBatch(persons);
+                    updateStatus(importStatus,cnt);
                     persons.clear();
                 }
             }
             if (!persons.isEmpty()) {
                 cnt += persons.size();
-                personRepository.saveAllAndFlush(persons);
-                batchProcessingService.updateImport(importStatus, cnt);
-                entityManager.clear();
-
+                batchProcessingService.saveBatch(persons);
+                updateStatus(importStatus,cnt);
             }
             importStatus.setStatus(StatusType.COMPLETED);
         } catch (IOException | DataIntegrityViolationException e) {
             importStatus.setStatus(StatusType.FAILED);
             throw new ImportProcessingException("Error processing import ", e);
         } finally {
-           batchProcessingService.updateImport(importStatus,cnt);
+            importRepository.save(importStatus);
         }
+    }
+
+    private void updateStatus(ImportStatus status, long cnt){
+        status.setProcessedRows(cnt);
+        importRepository.save(status);
+
     }
 
 

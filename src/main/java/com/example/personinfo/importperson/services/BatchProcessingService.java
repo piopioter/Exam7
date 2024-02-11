@@ -14,17 +14,15 @@ import java.util.List;
 @Component
 public class BatchProcessingService {
 
-    private ImportRepository importRepository;
+    private PersonRepository personRepository;
 
-    public BatchProcessingService(ImportRepository importRepository) {
-        this.importRepository = importRepository;
+    public BatchProcessingService(PersonRepository personRepository) {
+        this.personRepository = personRepository;
     }
 
-
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateImport(ImportStatus status, long cnt ){
-        status.setProcessedRows(cnt);
-        importRepository.save(status);
+    public void saveBatch(List<Person> personList){
+       personRepository.saveAll(personList);
     }
 
 }

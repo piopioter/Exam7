@@ -87,7 +87,7 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.fileName").value("test.csv"));
 
         //then
-        verify(personRepository,times(1)).saveAllAndFlush(any());
+        verify(personRepository,times(1)).saveAll(any());
 
 
 
