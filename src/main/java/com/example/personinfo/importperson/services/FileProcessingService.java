@@ -50,7 +50,6 @@ public class FileProcessingService {
         long cnt = 0;
         String line;
         List<Person> persons = new ArrayList<>();
-
         try (
                 BufferedReader br = new BufferedReader(new InputStreamReader(file.getInputStream()));
         ) {
