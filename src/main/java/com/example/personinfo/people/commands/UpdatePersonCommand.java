@@ -1,14 +1,9 @@
 package com.example.personinfo.people.commands;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.pl.PESEL;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY)
-public abstract class UpdatePersonCommand {
+public abstract class UpdatePersonCommand implements IPersonCommand {
 
 
     private String type;
@@ -18,7 +13,7 @@ public abstract class UpdatePersonCommand {
     private String firstName;
     @NotBlank
     private String lastName;
-    //@PESEL
+    @PESEL
     private String pesel;
     @Positive
     @NotNull

@@ -12,19 +12,22 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Component
-public class BatchProcessingService {
+public class SimpleService {
 
     private PersonRepository personRepository;
+    private ImportRepository importRepository;
 
-    public BatchProcessingService(PersonRepository personRepository) {
+    public SimpleService(PersonRepository personRepository, ImportRepository importRepository) {
         this.personRepository = personRepository;
+        this.importRepository = importRepository;
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void saveBatch(List<Person> personList){
-       personRepository.saveAll(personList);
-    }
+    public void updateStatus(ImportStatus status, long cnt){
+        status.setProcessedRows(cnt);
+        importRepository.save(status);
 
+    }
 }
 
 

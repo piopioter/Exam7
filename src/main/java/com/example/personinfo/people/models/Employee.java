@@ -1,16 +1,11 @@
 package com.example.personinfo.people.models;
 
-import com.example.personinfo.position.models.Position;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 
 @Entity
 @DiscriminatorValue("Employee")

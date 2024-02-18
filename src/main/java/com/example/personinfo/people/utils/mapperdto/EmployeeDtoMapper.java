@@ -1,4 +1,4 @@
-package com.example.personinfo.people.utils.mapper;
+package com.example.personinfo.people.utils.mapperdto;
 
 import com.example.personinfo.people.dto.EmployeeDto;
 import com.example.personinfo.people.dto.PersonDto;
@@ -8,11 +8,11 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class EmployeeMapper implements PersonMapperStrategy {
+public class EmployeeDtoMapper implements PersonDtoMapper {
 
     private ModelMapper modelMapper;
 
-    public EmployeeMapper(ModelMapper modelMapper) {
+    public EmployeeDtoMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 

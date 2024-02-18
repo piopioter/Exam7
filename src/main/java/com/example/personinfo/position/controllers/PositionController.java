@@ -2,7 +2,6 @@ package com.example.personinfo.position.controllers;
 
 import com.example.personinfo.people.services.EmployeeService;
 import com.example.personinfo.position.commands.CreatePositionCommand;
-import com.example.personinfo.position.commands.PositionAssignCommand;
 import com.example.personinfo.position.commands.UpdatePositionCommand;
 import com.example.personinfo.position.dto.FullPositionDto;
 import com.example.personinfo.position.dto.PositionDto;
@@ -44,26 +43,20 @@ public class PositionController {
     }
 
     @PostMapping
-    public ResponseEntity<PositionDto> create(@RequestBody @Valid CreatePositionCommand command) {
-        Position position = mapper.map(command, Position.class);
-        Position savedPosition = positionService.create(position);
-        PositionDto positionDto = mapper.map(savedPosition, PositionDto.class);
-        return ResponseEntity.status(HttpStatus.CREATED).body(positionDto);
-    }
-    @PutMapping("/employee")
-    public ResponseEntity<FullPositionDto> assignPosition(@RequestBody @Valid PositionAssignCommand command) {
+    public ResponseEntity<FullPositionDto> createPosition(@RequestBody @Valid CreatePositionCommand command) {
         Position position = mapper.map(command, Position.class);
         position.setEmployee(employeeService.get(command.getEmployeeId()));
-        Position assignPosition = positionService.assignEmployee(position);
-        FullPositionDto positionDto = mapper.map(assignPosition, FullPositionDto.class);
-        return ResponseEntity.ok(positionDto);
+        Position createdPosition = positionService.createPosition(position);
+        FullPositionDto positionDto = mapper.map(createdPosition, FullPositionDto.class);
+        return ResponseEntity.status(HttpStatus.CREATED).body(positionDto);
     }
 
     @PutMapping
-    public ResponseEntity<PositionDto> update(@RequestBody @Valid UpdatePositionCommand command) {
+    public ResponseEntity<FullPositionDto> update(@RequestBody @Valid UpdatePositionCommand command) {
         Position position = mapper.map(command, Position.class);
-        Position assignPosition = positionService.update(position);
-        PositionDto positionDto = mapper.map(assignPosition, PositionDto.class);
+        position.setEmployee(employeeService.get(command.getEmployeeId()));
+        Position updatedPosition = positionService.update(position);
+        FullPositionDto positionDto = mapper.map(updatedPosition, FullPositionDto.class);
         return ResponseEntity.ok(positionDto);
     }
 

@@ -1,8 +1,6 @@
 package com.example.personinfo.people.models;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
-import org.hibernate.annotations.DynamicUpdate;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

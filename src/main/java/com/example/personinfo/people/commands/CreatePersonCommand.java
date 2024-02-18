@@ -1,14 +1,12 @@
 package com.example.personinfo.people.commands;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import org.hibernate.validator.constraints.pl.PESEL;
 
-@JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type", visible = true,
-        include = JsonTypeInfo.As.EXISTING_PROPERTY)
-public abstract class CreatePersonCommand {
+
+public class CreatePersonCommand implements IPersonCommand {
 
     private String type;
     @NotBlank
@@ -67,4 +65,31 @@ public abstract class CreatePersonCommand {
         return email;
     }
 
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public void setPesel(String pesel) {
+        this.pesel = pesel;
+    }
+
+    public void setHeight(Double height) {
+        this.height = height;
+    }
+
+    public void setWeight(Double weight) {
+        this.weight = weight;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
 }

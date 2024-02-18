@@ -17,8 +17,6 @@ import org.springframework.batch.core.JobParameters;
 import org.springframework.batch.core.JobParametersBuilder;
 import org.springframework.batch.core.launch.JobLauncher;
 import org.springframework.batch.core.repository.JobRepository;
-import org.springframework.batch.test.JobLauncherTestUtils;
-import org.springframework.batch.test.context.SpringBatchTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -87,7 +85,7 @@ class ImportControllerTest {
                 .andExpect(jsonPath("$.fileName").value("test.csv"));
 
         //then
-        verify(personRepository,times(1)).saveAll(any());
+        verify(personRepository,times(1)).saveAllAndFlush(any());
 
 
 

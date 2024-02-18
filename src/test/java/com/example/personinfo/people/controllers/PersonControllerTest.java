@@ -9,7 +9,6 @@ import com.example.personinfo.people.models.Student;
 import com.example.personinfo.people.repositories.PersonRepository;
 import com.example.personinfo.people.services.PersonService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONObject;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -27,7 +26,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -230,8 +228,8 @@ class PersonControllerTest {
                 "jan@wp.pl", "Ignacego", LocalDate.parse("2022-02-02"),
                 "Philosophy", BigDecimal.valueOf(6000));
         personRepository.saveAndFlush(p1);
-        UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 2L, "Jan", "Kowalski",
-                "97012303194", 165.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
+        UpdatePersonCommand c1 = new UpdateStudentCommand("Student", 2L, "Darek", "Kowalski",
+                "97012303195", 165.0, 68.9, "jan@wp.pl", 0L, "Ignacego",
                 LocalDate.parse("2022-02-02"), "Philosophy", BigDecimal.valueOf(6000));
         //when
         mockMvc.perform(put("/api/v1/people")

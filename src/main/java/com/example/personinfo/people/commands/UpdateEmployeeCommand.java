@@ -1,15 +1,12 @@
 package com.example.personinfo.people.commands;
 
-import com.example.personinfo.people.annotations.PersonType;
-import com.example.personinfo.people.models.Employee;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-@PersonType(Employee.class)
-@JsonIgnoreProperties(ignoreUnknown = true)
-public class UpdateEmployeeCommand extends UpdatePersonCommand{
+@JsonDeserialize
+public class UpdateEmployeeCommand extends UpdatePersonCommand {
     @FutureOrPresent
     @NotNull
     private LocalDate employmentDate;

@@ -1,22 +1,21 @@
-package com.example.personinfo.people.utils.mapper;
+package com.example.personinfo.people.utils.mapperdto;
 
 import com.example.personinfo.people.dto.PersonDto;
 import com.example.personinfo.people.models.Person;
 import org.springframework.stereotype.Component;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 @Component
-public class PersonMapper {
+public class EntityToDtoMapper {
 
-    private List<PersonMapperStrategy> strategies;
+    private List<PersonDtoMapper> strategies;
 
-    public PersonMapper(List<PersonMapperStrategy> strategies) {
+    public EntityToDtoMapper(List<PersonDtoMapper> strategies) {
         this.strategies = strategies;
     }
 
-    public PersonDto mapToPersonDto(Person person) {
-        for (PersonMapperStrategy strategy : strategies) {
+    public PersonDto mapEntityToDto(Person person) {
+        for (PersonDtoMapper strategy : strategies) {
             if (strategy.sup(person.getClass()))
                 return strategy.map(person);
         }

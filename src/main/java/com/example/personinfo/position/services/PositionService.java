@@ -1,16 +1,16 @@
 package com.example.personinfo.position.services;
 
+import com.example.personinfo.people.exceptions.DataConflictException;
 import com.example.personinfo.people.exceptions.ResourceNotFoundException;
 import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.services.EmployeeService;
+import com.example.personinfo.position.exceptions.InvalidDateRangeException;
 import com.example.personinfo.position.models.Position;
 import com.example.personinfo.position.repositories.PositionRepository;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -24,39 +24,31 @@ public class PositionService implements IPositionService {
         this.employeeService = employeeService;
     }
 
-
     @Override
+    @Transactional(readOnly = true)
     public List<Position> getAllByEmployeeId(Long employeeId) {
         return positionRepository.findAllByEmployeeId(employeeId);
-
     }
-
 
     @Override
     @Transactional
-    public Position assignEmployee(Position position) {
+    public Position createPosition(Position position) {
         Employee employee = employeeService.get(position.getEmployee().getId());
-        positionRepository.findById(position.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Not found entity to assign with id: " + position.getId()));
-        employee.setCurrentPosition(position.getName());
-        employee.setCurrentSalary(position.getSalary());
-        employee.setEmploymentDate(position.getStartDate());
+        List<Position> positions = getAllByEmployeeId(employee.getId());
+        if (!isPositionDateAvailable(positions, position))
+            throw new DataConflictException("Position date overlaps with existing employee position");
         return positionRepository.save(position);
     }
-
-    @Override
-    public Position create(Position position) {
-        return positionRepository.save(position);
-    }
-
 
     @Override
     @Transactional
     public Position update(Position position) {
         positionRepository.findById(position.getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Not found entity to update with id: " + position.getId()));
+        List<Position> positions = getAllByEmployeeId(position.getEmployee().getId());
+        if (!isPositionDateAvailable(positions, position))
+            throw new DataConflictException("Position date overlaps with existing employee position");
         return positionRepository.save(position);
-
     }
 
     @Override
@@ -64,8 +56,21 @@ public class PositionService implements IPositionService {
     public void delete(Long positionId) {
         positionRepository.findById(positionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found entity to delete with id: " + positionId));
-
         positionRepository.deleteById(positionId);
+    }
 
+    private boolean isPositionDateAvailable(List<Position> positions, Position position) {
+        LocalDate start = position.getStartDate();
+        LocalDate end = position.getEndDate();
+
+        if (start.isAfter(end))
+            throw new InvalidDateRangeException("Start date  must be before end date");
+
+        for (Position p : positions) {
+            if (start.isBefore(p.getEndDate().plusDays(1)) && end.isAfter(p.getStartDate())) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -1,15 +1,14 @@
 package com.example.personinfo.position.commands;
 
-import com.example.personinfo.position.validations.NoDateOverlap;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import org.hibernate.validator.constraints.pl.PESEL;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-@NoDateOverlap
+
 public class CreatePositionCommand {
+
     @NotBlank
     private String name;
     @NotNull
@@ -19,16 +18,22 @@ public class CreatePositionCommand {
     @Positive
     @NotNull
     private BigDecimal salary;
+    @NotNull
+    private Long employeeId;
 
     public CreatePositionCommand() {
     }
 
-    public CreatePositionCommand(String name, LocalDate startDate, LocalDate endDate, BigDecimal salary) {
+    public CreatePositionCommand(String name, LocalDate startDate, LocalDate endDate,
+                                 BigDecimal salary, Long employeeId) {
         this.name = name;
         this.startDate = startDate;
         this.endDate = endDate;
         this.salary = salary;
+        this.employeeId = employeeId;
     }
+
+
 
     public String getName() {
         return name;
@@ -44,5 +49,9 @@ public class CreatePositionCommand {
 
     public BigDecimal getSalary() {
         return salary;
+    }
+
+    public Long getEmployeeId() {
+        return employeeId;
     }
 }

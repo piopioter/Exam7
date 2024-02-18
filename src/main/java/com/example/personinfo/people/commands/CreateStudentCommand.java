@@ -1,19 +1,15 @@
 package com.example.personinfo.people.commands;
 
-import com.example.personinfo.people.annotations.PersonType;
-import com.example.personinfo.people.commands.CreatePersonCommand;
-import com.example.personinfo.people.models.Student;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-@PersonType(Student.class)
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize
 public class CreateStudentCommand extends CreatePersonCommand {
+
     @NotBlank
     private String universityName;
     @NotNull

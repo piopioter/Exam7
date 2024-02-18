@@ -9,14 +9,11 @@ import com.example.personinfo.people.models.Person;
 import com.example.personinfo.people.repositories.PersonRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedReader;
@@ -29,21 +26,23 @@ import java.util.List;
 @Component
 public class FileProcessingService {
 
-    private BatchProcessingService batchProcessingService;
+    private SimpleService simpleService;
     private ProcessPersonFactory personFactory;
-    private ImportRepository importRepository;
+    private PersonRepository personRepository;
     @Value("${spring.jpa.properties.hibernate.jdbc.batch_size}")
     private int batchSize;
+    @PersistenceContext
+    private EntityManager entityManager;
 
-    public FileProcessingService(BatchProcessingService batchProcessingService, ProcessPersonFactory personFactory,
-                                ImportRepository importRepository) {
-        this.batchProcessingService = batchProcessingService;
+    public FileProcessingService(SimpleService simpleService, ProcessPersonFactory personFactory,
+                                 PersonRepository personRepository) {
+        this.simpleService = simpleService;
         this.personFactory = personFactory;
-        this.importRepository = importRepository;
-
+        this.personRepository = personRepository;
     }
 
     @Async
+    @Transactional
     public void processFile(MultipartFile file, ImportStatus importStatus) {
         long cnt = 0;
         String line;
@@ -59,32 +58,25 @@ public class FileProcessingService {
                 persons.add(person);
                 if (persons.size() == batchSize) {
                     cnt += persons.size();
-                    batchProcessingService.saveBatch(persons);
-                    updateStatus(importStatus,cnt);
+                    personRepository.saveAllAndFlush(persons);
+                    simpleService.updateStatus(importStatus, cnt);
+                    entityManager.clear();
                     persons.clear();
                 }
             }
             if (!persons.isEmpty()) {
                 cnt += persons.size();
-                batchProcessingService.saveBatch(persons);
-                updateStatus(importStatus,cnt);
+                personRepository.saveAllAndFlush(persons);
+                simpleService.updateStatus(importStatus, cnt);
+                entityManager.clear();
             }
             importStatus.setStatus(StatusType.COMPLETED);
         } catch (IOException | DataIntegrityViolationException e) {
             importStatus.setStatus(StatusType.FAILED);
             throw new ImportProcessingException("Error processing import ", e);
         } finally {
-            importRepository.save(importStatus);
+            simpleService.updateStatus(importStatus, cnt);
         }
     }
-
-    private void updateStatus(ImportStatus status, long cnt){
-        status.setProcessedRows(cnt);
-        importRepository.save(status);
-
-    }
-
-
-
 
 }

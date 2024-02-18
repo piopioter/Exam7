@@ -1,15 +1,13 @@
 package com.example.personinfo.people.commands;
 
-import com.example.personinfo.people.annotations.PersonType;
-import com.example.personinfo.people.models.Retiree;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 
 import java.math.BigDecimal;
-@PersonType(Retiree.class)
-@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonDeserialize
 public class CreateRetireeCommand extends CreatePersonCommand {
+
     @Positive
     @NotNull
     private BigDecimal pensionAmount;

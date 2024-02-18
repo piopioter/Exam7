@@ -1,20 +1,18 @@
-package com.example.personinfo.people.utils.mapper;
+package com.example.personinfo.people.utils.mapperdto;
 
 import com.example.personinfo.people.dto.PersonDto;
 import com.example.personinfo.people.dto.StudentDto;
-import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.models.Person;
 import com.example.personinfo.people.models.Student;
 import org.modelmapper.ModelMapper;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StudentMapper implements PersonMapperStrategy{
+public class StudentDtoMapper implements PersonDtoMapper {
 
     private ModelMapper modelMapper;
 
-    public StudentMapper(ModelMapper modelMapper) {
+    public StudentDtoMapper(ModelMapper modelMapper) {
         this.modelMapper = modelMapper;
     }
 
