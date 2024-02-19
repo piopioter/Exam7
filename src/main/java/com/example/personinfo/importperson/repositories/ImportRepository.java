@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface ImportRepository extends JpaRepository<ImportStatus,Long> {
-    @Query("SELECT i FROM ImportStatus i WHERE i.status = 'IN_PROGRESS' ")
+    @Query("SELECT i FROM ImportStatus i WHERE i.status = 'IN_PROGRESS'")
     List<ImportStatus> findAllByStatusInProgress();
 }

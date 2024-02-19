@@ -4,6 +4,7 @@ import com.example.personinfo.importperson.exceptions.ImportAlreadyInProgressExc
 import com.example.personinfo.importperson.exceptions.ImportProcessingException;
 import com.example.personinfo.people.exceptions.DataConflictException;
 import com.example.personinfo.people.exceptions.ResourceNotFoundException;
+import com.example.personinfo.people.exceptions.UnsupportedCommandException;
 import com.example.personinfo.position.exceptions.InvalidDateRangeException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
@@ -53,8 +54,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(exceptionResponseDto);
     }
 
-    @ExceptionHandler(InvalidDateRangeException.class)
-    public ResponseEntity<ExceptionResponseDto> handleInvalidDateRangeException(InvalidDateRangeException e){
+    @ExceptionHandler({InvalidDateRangeException.class, UnsupportedCommandException.class})
+    public ResponseEntity<ExceptionResponseDto> handleInvalidDateRangeException(RuntimeException e){
         ExceptionResponseDto exceptionResponseDto = new ExceptionResponseDto(
                 List.of(e.getMessage()), "BAD_REQUEST", LocalDateTime.now());
 

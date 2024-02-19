@@ -7,11 +7,11 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 @Component
 public class ProcessPersonFactory {
 
-   private Map<String, PersonFactory> factories;
-
+    private Map<String, PersonFactory> factories;
 
     public ProcessPersonFactory(Map<String, PersonFactory> factories) {
         this.factories = factories;

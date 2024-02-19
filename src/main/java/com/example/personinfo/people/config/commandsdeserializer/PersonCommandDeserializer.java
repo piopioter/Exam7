@@ -1,6 +1,7 @@
 package com.example.personinfo.people.config.commandsdeserializer;
 
 import com.example.personinfo.people.commands.IPersonCommand;
+import com.example.personinfo.people.exceptions.UnsupportedCommandException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
@@ -22,14 +23,16 @@ public class PersonCommandDeserializer extends JsonDeserializer<IPersonCommand> 
 
     @Override
     public IPersonCommand deserialize(JsonParser jsonParser, DeserializationContext dCtx) throws IOException {
-
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
         JsonNode root = mapper.readTree(jsonParser);
 
-            for (CommandStrategy strategy : strategies) {
-                if (strategy.sup(root.get("type").asText()))
-                    return strategy.create(root, mapper);
-            }
-        return null;
+        if (!root.has("type"))
+            throw new UnsupportedCommandException("Missing type field");
+
+        for (CommandStrategy strategy : strategies) {
+            if (strategy.sup(root.get("type").asText()))
+                return strategy.create(root, mapper);
+        }
+        throw new UnsupportedCommandException("Unknown type");
     }
 }

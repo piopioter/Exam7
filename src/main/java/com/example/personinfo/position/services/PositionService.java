@@ -17,11 +17,10 @@ import java.util.List;
 public class PositionService implements IPositionService {
 
     private PositionRepository positionRepository;
-    private EmployeeService employeeService;
 
-    public PositionService(PositionRepository positionRepository, EmployeeService employeeService) {
+
+    public PositionService(PositionRepository positionRepository) {
         this.positionRepository = positionRepository;
-        this.employeeService = employeeService;
     }
 
     @Override
@@ -33,10 +32,12 @@ public class PositionService implements IPositionService {
     @Override
     @Transactional
     public Position createPosition(Position position) {
-        Employee employee = employeeService.get(position.getEmployee().getId());
-        List<Position> positions = getAllByEmployeeId(employee.getId());
+        List<Position> positions = getAllByEmployeeId(position.getEmployee().getId());
         if (!isPositionDateAvailable(positions, position))
             throw new DataConflictException("Position date overlaps with existing employee position");
+        position.getEmployee().setCurrentSalary(position.getSalary());
+        position.getEmployee().setCurrentPosition(position.getName());
+        position.getEmployee().setEmploymentDate(position.getStartDate());
         return positionRepository.save(position);
     }
 
@@ -48,6 +49,9 @@ public class PositionService implements IPositionService {
         List<Position> positions = getAllByEmployeeId(position.getEmployee().getId());
         if (!isPositionDateAvailable(positions, position))
             throw new DataConflictException("Position date overlaps with existing employee position");
+        position.getEmployee().setCurrentSalary(position.getSalary());
+        position.getEmployee().setCurrentPosition(position.getName());
+        position.getEmployee().setEmploymentDate(position.getStartDate());
         return positionRepository.save(position);
     }
 
