@@ -118,31 +118,6 @@ class ImportControllerTest {
 
     }
 
-    @Test
-    @WithMockUser(roles = "ADMIN")
-    public void shouldReturn409StatusWhenImportInProgress() throws Exception {
-        //given
-        String csv = "Employee,Anna,Nowak,8602145218,170,55.0,anna@wp.pl,2022-01-01,Developer,8000\n" +
-                "Student,Jan,Kowalski,97012303195,180,80,jan@example.com,Ignacego,2022-02-02,Philosophy,3000\n";
-
-        MockMultipartFile file = new MockMultipartFile("file", "test.csv", "text/csv",
-                csv.getBytes());
-
-        //when
-        mockMvc.perform(multipart("/api/v1/import")
-                .file(file))
-                .andDo(print())
-                .andExpect(status().isAccepted())
-                .andReturn();
-
-        mockMvc.perform(multipart("/api/v1/import")
-                .file(file))
-                .andDo(print())
-                .andExpect(status().isConflict())
-                .andExpect(jsonPath("$.message").value("Another import in progress"));
-        //then
-    }
-
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -172,7 +147,7 @@ class ImportControllerTest {
     }
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void shouldReturnStatusWhenImportInProgress() throws Exception {
+    public void shouldPreventConcurrentImport() throws Exception {
         //given
         String csv = "Employee,Anna,Nowak,8602145218,170,55.0,anna@wp.pl,2022-01-01,Developer,8000\n" +
                 "Student,Jan,Kowalski,97012303195,180,80,jan@example.com,Ignacego,2022-02-02,Philosophy,3000\n";
