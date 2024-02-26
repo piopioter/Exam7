@@ -27,7 +27,6 @@ public class ImportService implements IImportService {
     }
 
     @Override
-    @Transactional
     public String uploadFromCsvFile(MultipartFile file) {
         if (!lockService.lock())
             throw new ImportAlreadyInProgressException("Another import in progress");
@@ -38,7 +37,6 @@ public class ImportService implements IImportService {
         ImportStatus status = importRepository.save(importStatus);
         fileProcessingService.processFile(file, status);
         return status.getId().toString();
-
     }
 
     @Override
