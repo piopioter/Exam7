@@ -1,6 +1,7 @@
-package com.example.personinfo.people.config.commandsdeserializer;
+package com.example.personinfo.people.config.commandsdeserializer.createdeserializator;
 
 import com.example.personinfo.people.commands.*;
+import com.example.personinfo.people.config.commandsdeserializer.createdeserializator.CreateCommandStrategy;
 import com.example.personinfo.people.models.Retiree;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -8,7 +9,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class RetireeCommandStrategy implements CommandStrategy {
+public class RetireeCreateCommandStrategy implements CreateCommandStrategy {
 
     @Override
     public boolean sup(String type) {
@@ -16,9 +17,7 @@ public class RetireeCommandStrategy implements CommandStrategy {
     }
 
     @Override
-    public IPersonCommand create(JsonNode root, ObjectMapper mapper) throws JsonProcessingException {
-        if (root.has("id"))
-            return mapper.readValue(root.toString(), UpdateRetireeCommand.class);
+    public CreatePersonCommand create(JsonNode root, ObjectMapper mapper) throws JsonProcessingException {
         return mapper.readValue(root.toString(), CreateRetireeCommand.class);
     }
 }

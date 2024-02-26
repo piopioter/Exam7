@@ -2,8 +2,7 @@ package com.example.personinfo.position.controllers;
 
 import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.repositories.EmployeeRepository;
-import com.example.personinfo.position.commands.CreatePositionCommand;
-import com.example.personinfo.position.commands.UpdatePositionCommand;
+import com.example.personinfo.position.commands.AssignPositionCommand;
 import com.example.personinfo.position.models.Position;
 import com.example.personinfo.position.repositories.PositionRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -90,16 +89,16 @@ class PositionControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
-    public void shouldReturnConflictInCreateMethod() throws Exception {
+    public void shouldReturnConflictInAssignMethod() throws Exception {
         //given
         Employee e1 = new Employee();
         employeeRepository.save(e1);
         positionRepository.save(new Position("Mechanic", LocalDate.parse("2022-01-01"),
                 LocalDate.parse("2027-01-01"), BigDecimal.valueOf(8000), e1));
-        CreatePositionCommand c = new CreatePositionCommand("Programmer", LocalDate.parse("2027-01-01"),
+        AssignPositionCommand c = new AssignPositionCommand("Programmer", LocalDate.parse("2027-01-01"),
                 LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 1L);
         //when
-        mockMvc.perform(post("/api/v1/positions")
+        mockMvc.perform(post("/api/v1/positions/assign")
                 .content(om.writeValueAsString(c))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
                 .andDo(print())
@@ -111,18 +110,18 @@ class PositionControllerTest {
 
     @Test
     @WithMockUser(roles = "EMPLOYEE")
-    public void shouldCreatePosition() throws Exception {
+    public void shouldAssignPosition() throws Exception {
         //given
         Employee e1 = new Employee();
         employeeRepository.save(e1);
-        CreatePositionCommand c = new CreatePositionCommand("Programmer", LocalDate.parse("2025-01-01"),
+        AssignPositionCommand c = new AssignPositionCommand("Programmer", LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 1L);
         //when
-        mockMvc.perform(post("/api/v1/positions")
+        mockMvc.perform(post("/api/v1/positions/assign")
                 .content(om.writeValueAsString(c))
                 .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON))
                 .andDo(print())
-                .andExpect(status().isCreated())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Programmer"))
                 .andExpect(jsonPath("$.employee.id").value(e1.getId()));
 
@@ -138,59 +137,16 @@ class PositionControllerTest {
         Employee e1 = new Employee("Jan", "Kowalski", "97012303195", 170.0, 80.5,
                 "jan@wp.pl", LocalDate.parse("2022-02-02"), "Mechanic", BigDecimal.valueOf(5000));
         employeeRepository.saveAndFlush(e1);
-        CreatePositionCommand command = new CreatePositionCommand("Programmer", LocalDate.parse("2025-01-01"),
+        AssignPositionCommand command = new AssignPositionCommand("Programmer", LocalDate.parse("2025-01-01"),
                 LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 2L);
         //when
-        mockMvc.perform(post("/api/v1/positions")
+        mockMvc.perform(post("/api/v1/positions/assign")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(om.writeValueAsString(command)))
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.message").value("Not found entity with id: 2"));
     }
-
-    @Test
-    @WithMockUser
-    public void shouldUpdatePosition() throws Exception {
-        //given
-        employeeRepository.save(new Employee());
-        Position p1 = new Position(
-                "Programmer", LocalDate.parse("2022-01-01"), LocalDate.parse("2024-01-01"), BigDecimal.valueOf(8000));
-        positionRepository.saveAndFlush(p1);
-        UpdatePositionCommand command = new UpdatePositionCommand(1L, "Programmer",
-                LocalDate.parse("2025-01-01"), LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 1L);
-
-        //when
-        mockMvc.perform(put("/api/v1/positions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(command)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1L))
-                .andExpect(jsonPath("$.name").value("Programmer"))
-                .andExpect(jsonPath("$.startDate").value("2025-01-01"))
-                .andExpect(jsonPath("$.endDate").value("2029-01-01"))
-                .andExpect(jsonPath("$.salary").value(24000));
-        //then
-        verify(positionRepository, times(1)).save(any(Position.class));
-
-    }
-
-    @Test
-    @WithMockUser
-    public void shouldReturnNotFoundWhenPositionToUpdateDoesNotExist() throws Exception {
-        //given
-        employeeRepository.save(new Employee());
-        UpdatePositionCommand command = new UpdatePositionCommand(1L, "Programmer", LocalDate.parse("2025-01-01"),
-                LocalDate.parse("2029-01-01"), BigDecimal.valueOf(24000), 1L);
-        //when
-        mockMvc.perform(put("/api/v1/positions")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(om.writeValueAsString(command)))
-                .andDo(print())
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.message").value("Not found entity to update with id: 1"));
-    }
-
 
     @Test
     @WithMockUser

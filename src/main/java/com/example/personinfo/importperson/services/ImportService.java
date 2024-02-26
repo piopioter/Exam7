@@ -5,48 +5,40 @@ import com.example.personinfo.importperson.models.ImportStatus;
 import com.example.personinfo.importperson.models.StatusType;
 import com.example.personinfo.importperson.repositories.ImportRepository;
 import com.example.personinfo.people.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.concurrent.locks.ReentrantLock;
 
 @Service
 public class ImportService implements IImportService {
 
+    private LockService lockService;
     private ImportRepository importRepository;
     private FileProcessingService fileProcessingService;
-    private ReentrantLock lock;
 
-    public ImportService(ImportRepository importRepository, FileProcessingService fileProcessingService, ReentrantLock lock) {
+
+
+    public ImportService(LockService lockService, ImportRepository importRepository, FileProcessingService fileProcessingService) {
+        this.lockService = lockService;
         this.importRepository = importRepository;
         this.fileProcessingService = fileProcessingService;
-        this.lock = lock;
     }
 
     @Override
+    @Transactional
     public String uploadFromCsvFile(MultipartFile file) {
-        lock.lock();
-        try {
-            if (isAnyProcessInProgress())
-                throw new ImportAlreadyInProgressException("Another import in progress");
-            ImportStatus importStatus = new ImportStatus();
-            importStatus.setCreationDate(LocalDateTime.now());
-            importStatus.setStatus(StatusType.IN_PROGRESS);
+        if (!lockService.lock())
+            throw new ImportAlreadyInProgressException("Another import in progress");
+        ImportStatus importStatus = new ImportStatus();
+        importStatus.setCreationDate(LocalDateTime.now());
+        importStatus.setStatus(StatusType.IN_PROGRESS);
 
-            ImportStatus status = importRepository.save(importStatus);
-            fileProcessingService.processFile(file, status);
-            return status.getId().toString();
-        } finally {
-            lock.unlock();
-        }
-    }
+        ImportStatus status = importRepository.save(importStatus);
+        fileProcessingService.processFile(file, status);
+        return status.getId().toString();
 
-    private boolean isAnyProcessInProgress() {
-        List<ImportStatus> imports = importRepository.findAllByStatusInProgress();
-        return !imports.isEmpty();
     }
 
     @Override

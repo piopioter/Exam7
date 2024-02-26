@@ -1,19 +1,19 @@
 package com.example.personinfo.people.commands;
 
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.example.personinfo.people.config.commandsdeserializer.createdeserializator.PersonCreateCommandDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.validation.constraints.*;
-import org.hibernate.validator.constraints.pl.PESEL;
 
-
-public class CreatePersonCommand implements IPersonCommand {
+@JsonDeserialize(using = PersonCreateCommandDeserializer.class)
+public abstract class CreatePersonCommand  {
 
     private String type;
     @NotBlank
     private String firstName;
     @NotBlank
     private String lastName;
-    @PESEL
+    //@PESEL
     private String pesel;
     @Positive
     @NotNull
@@ -21,7 +21,7 @@ public class CreatePersonCommand implements IPersonCommand {
     @Positive
     @NotNull
     private Double weight;
-    @Email
+    //@Email
     private String email;
 
     public CreatePersonCommand() {

@@ -31,21 +31,7 @@ public class PositionService implements IPositionService {
 
     @Override
     @Transactional
-    public Position createPosition(Position position) {
-        List<Position> positions = getAllByEmployeeId(position.getEmployee().getId());
-        if (!isPositionDateAvailable(positions, position))
-            throw new DataConflictException("Position date overlaps with existing employee position");
-        position.getEmployee().setCurrentSalary(position.getSalary());
-        position.getEmployee().setCurrentPosition(position.getName());
-        position.getEmployee().setEmploymentDate(position.getStartDate());
-        return positionRepository.save(position);
-    }
-
-    @Override
-    @Transactional
-    public Position update(Position position) {
-        positionRepository.findById(position.getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Not found entity to update with id: " + position.getId()));
+    public Position assignPosition(Position position) {
         List<Position> positions = getAllByEmployeeId(position.getEmployee().getId());
         if (!isPositionDateAvailable(positions, position))
             throw new DataConflictException("Position date overlaps with existing employee position");
@@ -76,5 +62,7 @@ public class PositionService implements IPositionService {
             }
         }
         return true;
+
+
     }
 }

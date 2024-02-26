@@ -66,7 +66,7 @@ public class WebSecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/v1/people").hasRole(Role.ADMIN.name())
                         .requestMatchers(HttpMethod.POST, "/api/v1/import")
                         .hasAnyRole(Role.ADMIN.name(), Role.IMPORTER.name())
-                        .requestMatchers(HttpMethod.POST, "/api/v1/positions")
+                        .requestMatchers(HttpMethod.POST, "/api/v1/positions/assign")
                         .hasAnyRole(Role.ADMIN.name(), Role.EMPLOYEE.name())
                         .anyRequest().authenticated());
         http.authenticationProvider(authenticationProvider());

@@ -1,6 +1,8 @@
-package com.example.personinfo.people.config.commandsdeserializer;
+package com.example.personinfo.people.config.commandsdeserializer.updatedeserializator;
 
-import com.example.personinfo.people.commands.IPersonCommand;
+import com.example.personinfo.people.commands.CreatePersonCommand;
+import com.example.personinfo.people.commands.UpdatePersonCommand;
+import com.example.personinfo.people.config.commandsdeserializer.createdeserializator.CreateCommandStrategy;
 import com.example.personinfo.people.exceptions.UnsupportedCommandException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -11,25 +13,24 @@ import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.List;
-
 @Component
-public class PersonCommandDeserializer extends JsonDeserializer<IPersonCommand> {
+public class PersonUpdateCommandDeserializer  extends JsonDeserializer<UpdatePersonCommand> {
 
-    private List<CommandStrategy> strategies;
+    private List<UpdateCommandStrategy> strategies;
 
-    public PersonCommandDeserializer(List<CommandStrategy> strategies) {
+    public PersonUpdateCommandDeserializer(List<UpdateCommandStrategy> strategies) {
         this.strategies = strategies;
     }
 
     @Override
-    public IPersonCommand deserialize(JsonParser jsonParser, DeserializationContext dCtx) throws IOException {
+    public UpdatePersonCommand deserialize(JsonParser jsonParser, DeserializationContext dCtx) throws IOException {
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
         JsonNode root = mapper.readTree(jsonParser);
 
         if (!root.has("type"))
             throw new UnsupportedCommandException("Missing type field");
 
-        for (CommandStrategy strategy : strategies) {
+        for (UpdateCommandStrategy strategy : strategies) {
             if (strategy.sup(root.get("type").asText()))
                 return strategy.create(root, mapper);
         }

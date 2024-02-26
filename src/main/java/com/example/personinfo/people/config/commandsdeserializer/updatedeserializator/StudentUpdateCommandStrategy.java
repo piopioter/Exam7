@@ -1,7 +1,8 @@
-package com.example.personinfo.people.config.commandsdeserializer;
+package com.example.personinfo.people.config.commandsdeserializer.updatedeserializator;
 
+import com.example.personinfo.people.commands.CreatePersonCommand;
 import com.example.personinfo.people.commands.CreateStudentCommand;
-import com.example.personinfo.people.commands.IPersonCommand;
+import com.example.personinfo.people.commands.UpdatePersonCommand;
 import com.example.personinfo.people.commands.UpdateStudentCommand;
 import com.example.personinfo.people.models.Student;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -10,7 +11,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Service;
 
 @Service
-public class StudentCommandStrategy implements CommandStrategy {
+public class StudentUpdateCommandStrategy implements UpdateCommandStrategy {
 
     @Override
     public boolean sup(String type) {
@@ -18,9 +19,7 @@ public class StudentCommandStrategy implements CommandStrategy {
     }
 
     @Override
-    public IPersonCommand create(JsonNode root, ObjectMapper mapper) throws JsonProcessingException {
-        if (root.has("id"))
-            return mapper.readValue(root.toString(), UpdateStudentCommand.class);
-        return mapper.readValue(root.toString(), CreateStudentCommand.class);
+    public UpdatePersonCommand create(JsonNode root, ObjectMapper mapper) throws JsonProcessingException {
+        return mapper.readValue(root.toString(), UpdateStudentCommand.class);
     }
 }

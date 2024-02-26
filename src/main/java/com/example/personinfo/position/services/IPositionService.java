@@ -10,9 +10,7 @@ public interface IPositionService {
 
     List<Position> getAllByEmployeeId(Long employeeId);
 
-    Position createPosition(Position position);
-
-    Position update(Position position);
+    Position assignPosition(Position position);
 
     void delete(Long positionId);
 

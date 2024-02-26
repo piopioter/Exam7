@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-public class CreatePositionCommand {
+public class AssignPositionCommand {
 
     @NotBlank
     private String name;
@@ -21,10 +21,10 @@ public class CreatePositionCommand {
     @NotNull
     private Long employeeId;
 
-    public CreatePositionCommand() {
+    public AssignPositionCommand() {
     }
 
-    public CreatePositionCommand(String name, LocalDate startDate, LocalDate endDate,
+    public AssignPositionCommand(String name, LocalDate startDate, LocalDate endDate,
                                  BigDecimal salary, Long employeeId) {
         this.name = name;
         this.startDate = startDate;

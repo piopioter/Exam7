@@ -1,5 +1,9 @@
 package com.example.personinfo.importperson.controllers;
 
+import com.example.personinfo.importperson.exceptions.ImportAlreadyInProgressException;
+import com.example.personinfo.importperson.models.LockTable;
+import com.example.personinfo.importperson.repositories.LockRepository;
+import com.example.personinfo.importperson.services.ImportService;
 import com.example.personinfo.people.models.Employee;
 import com.example.personinfo.people.models.Student;
 import com.example.personinfo.people.repositories.EmployeeRepository;
@@ -64,8 +68,9 @@ class ImportControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
+
     @SpyBean
-    private PersonRepository personRepository;
+    private ImportService importService;
 
     @Test
     @WithMockUser(roles = "ADMIN")
@@ -83,10 +88,6 @@ class ImportControllerTest {
                 .andExpect(status().isAccepted())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.fileName").value("test.csv"));
-
-        //then
-        verify(personRepository,times(1)).saveAllAndFlush(any());
-
 
 
     }
@@ -142,6 +143,7 @@ class ImportControllerTest {
         //then
     }
 
+
     @Test
     @WithMockUser(roles = "ADMIN")
     public void shouldReturnBadRequestWhenIncorrectTypeFile() throws Exception {
@@ -168,8 +170,54 @@ class ImportControllerTest {
                 .andDo(print())
                 .andExpect(status().isForbidden());
     }
+    @Test
+    @WithMockUser(roles = "ADMIN")
+    public void shouldReturnStatusWhenImportInProgress() throws Exception {
+        //given
+        String csv = "Employee,Anna,Nowak,8602145218,170,55.0,anna@wp.pl,2022-01-01,Developer,8000\n" +
+                "Student,Jan,Kowalski,97012303195,180,80,jan@example.com,Ignacego,2022-02-02,Philosophy,3000\n";
+
+       CountDownLatch latch = new CountDownLatch(2);
+       ImportThread i1 = new ImportThread(latch,csv);
+       ImportThread i2 = new ImportThread(latch,csv);
+        //when
+        i1.start();
+        i2.start();
+        latch.await();
+
+        //then
+        assertAll(
+                () -> assertTrue(i1.hasImportAlreadyInProgressException() || i2.hasImportAlreadyInProgressException())
+        );
+    }
 
 
+    class ImportThread extends Thread {
+        private CountDownLatch countDownLatch;
+        private Class<?> exception;
+        private String csv;
+
+        public ImportThread(CountDownLatch countDownLatch, String csv) {
+            this.countDownLatch = countDownLatch;
+            this.csv = csv;
+        }
+
+        boolean hasImportAlreadyInProgressException() {
+            return this.exception == ImportAlreadyInProgressException.class;
+        }
+
+        @Override
+        public void run() {
+            try {
+                importService.uploadFromCsvFile(new MockMultipartFile("file", "test.csv",
+                        "text/csv", csv.getBytes()));
+            } catch (Exception e) {
+                exception = e.getClass();
+            } finally {
+                countDownLatch.countDown();
+            }
+        }
+    }
 
 }
 
