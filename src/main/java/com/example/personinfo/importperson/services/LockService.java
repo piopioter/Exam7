@@ -4,6 +4,7 @@ import com.example.personinfo.importperson.models.LockTable;
 import com.example.personinfo.importperson.repositories.LockRepository;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Component
 public class LockService {
@@ -13,6 +14,7 @@ public class LockService {
     public LockService(LockRepository lockRepository) {
         this.lockRepository = lockRepository;
     }
+
 
     public boolean lock() {
         try {
